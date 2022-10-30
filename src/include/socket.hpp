@@ -53,14 +53,14 @@ namespace da
          *
          * @param buf the message to send
          */
-        ssize_t write(const std::string &buf, const udp_sockaddr &dest);
+        ssize_t write(const void * buf, size_t len, const udp_sockaddr &dest);
 
         /**
          * @brief Waits for a message to be received on the UDP channel, blocking call.
          *
          * @param buf a buffer for message to be received
          */
-        ssize_t read(std::string &buf, size_t max_len, udp_sockaddr &src);
+        ssize_t read(void * buf, size_t max_len, udp_sockaddr &src);
 
     private:
         socket_descriptor(int sockfd);

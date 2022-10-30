@@ -3,17 +3,24 @@
 #include <map>
 #include <thread>
 #include <atomic>
+#include <mutex>
 #include <iostream>
+#include <array>
 #include "socket.hpp"
-#include "blocking_queue.hpp"
 
 namespace da
 {
-    void talk(std::atomic<bool>&, udp_socket, std::mutex&, std::vector<std::pair<udp_sockaddr, std::string>>&);
-    void listen(std::atomic<bool>& listening,
-                udp_socket socket,
-                std::vector<std::string>& delivered,
-                std::vector<std::function<void(std::string &, udp_sockaddr &)>>& callbacks);
+    void talk(std::atomic<bool>&, 
+              udp_socket, 
+              std::mutex&, 
+              std::vector<std::tuple<udp_sockaddr, unsigned long, void*, size_t>>&);
+              
+    void listen(std::atomic<bool>&,
+                udp_socket,
+                std::mutex&,
+                std::map<udp_sockaddr, std::vector<unsigned long>>&,
+                std::vector<std::tuple<udp_sockaddr, unsigned long, void*, size_t>>&,
+                std::vector<std::function<void(std::string &, udp_sockaddr &)>>&);
 
     class perfect_link
     {
@@ -49,11 +56,11 @@ namespace da
 
     private:
         std::atomic<bool> listening, talking;
-        unsigned long id_counter;
+        unsigned long id;
         std::vector<std::function<void(std::string &, udp_sockaddr &)>> handlers;
-        std::vector<std::string> delivered;
+        std::map<udp_sockaddr, std::vector<unsigned long>> delivered;
         std::mutex mutex;
-        std::vector<std::pair<udp_sockaddr, std::string>> sent;
+        std::vector<std::tuple<udp_sockaddr, unsigned long, void*, size_t>> sent;
         std::thread sender, listener;
         udp_socket socket;
     };

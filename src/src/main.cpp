@@ -8,6 +8,11 @@
 #include "hello.h"
 #include "perfectlink.hpp"
 
+std::string output_path;
+std::map<da::udp_sockaddr, std::string> proc_id;
+std::vector<std::pair<std::string, da::udp_sockaddr>> delivered;
+std::vector<std::string> sent;
+
 static void stop(int)
 {
   // reset signal handlers to default
@@ -19,6 +24,18 @@ static void stop(int)
 
   // write/flush output file if necessary
   std::cout << "Writing output.\n";
+  std::fstream output(output_path, std::ios::out);
+  for (auto &m : sent)
+  {
+    output << "b " << m << "\n";
+  }
+
+  for (auto &[m, p] : delivered)
+  {
+    output << "d " << proc_id[p] << " " << m << "\n";
+  }
+
+  output.close();
 
   // exit directly from signal handler
   exit(0);
@@ -69,23 +86,52 @@ int main(int argc, char **argv)
 
   std::cout << "Doing some initialization...\n\n";
 
-  Parser::Host me = parser.hosts()[parser.id()];
+  // init addr / id pairs
+  for (auto const &peer : parser.hosts())
+  {
+    da::udp_sockaddr remote{peer.ip, peer.port};
+    proc_id[remote] = std::to_string(peer.id);
+  }
+
+  // read config file
+  std::fstream conf(parser.configPath(), std::ios::in);
+  unsigned long target_id;
+  unsigned long nbr_msg;
+  conf >> nbr_msg;
+  conf >> target_id;
+  conf.close();
+
+  std::cout << "nbr: " << nbr_msg << "\n";
+
+  std::cout << "target: " << target_id << "\n";
+
+  // save file output path
+  output_path = parser.outputPath();
+  std::cout << "output path: " << output_path << "\n";
+
+  Parser::Host me = parser.hosts()[parser.id() - 1];
   da::udp_sockaddr host{me.ip, me.port};
+  Parser::Host remote = parser.hosts()[target_id - 1];
+  da::udp_sockaddr target{remote.ip, remote.port};
+
   da::udp_socket socket = da::socket_descriptor::bind(host);
   da::perfect_link link(socket);
   link.upon_deliver([](std::string &msg, da::udp_sockaddr &src) -> void
-                    { std::cout << msg << "\n"; });
+                    { delivered.push_back(std::make_pair(msg, src)); });
 
   std::cout << "Broadcasting...\n\n";
+  // broadcasting
 
-  // After a process finishes broadcasting,
-  // it waits forever for the delivery of messages.
-  std::string message = std::to_string(parser.id());
-  for (auto &peer : parser.hosts())
+  if (parser.id() != target_id)
   {
-    da::udp_sockaddr host{peer.ip, peer.port};
-    link.send(message, host);
+    for (unsigned long i = 1; i <= nbr_msg; i++)
+    {
+      std::string msg = std::to_string(i);
+      link.send(msg, target);
+      sent.push_back(msg);
+    }
   }
+
   while (true)
   {
     std::this_thread::sleep_for(std::chrono::seconds(1));

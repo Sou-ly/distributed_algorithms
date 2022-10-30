@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/souly/Desktop/da_project/template_cpp/src/build",
+  "command": "/bin/x86_64-linux-gnu-g++-9  -I/home/souly/Desktop/da_project/template_cpp/src/include -g -o CMakeFiles/da_proc.dir/src/main.o -c /home/souly/Desktop/da_project/template_cpp/src/src/main.cpp",
+  "file": "/home/souly/Desktop/da_project/template_cpp/src/src/main.cpp"
+},
+{
+  "directory": "/home/souly/Desktop/da_project/template_cpp/src/build",
+  "command": "/bin/x86_64-linux-gnu-gcc-9  -I/home/souly/Desktop/da_project/template_cpp/src/include -g -o CMakeFiles/da_proc.dir/src/hello.o -c /home/souly/Desktop/da_project/template_cpp/src/src/hello.c",
+  "file": "/home/souly/Desktop/da_project/template_cpp/src/src/hello.c"
+},
+{
+  "directory": "/home/souly/Desktop/da_project/template_cpp/src/build",
+  "command": "/bin/x86_64-linux-gnu-g++-9  -I/home/souly/Desktop/da_project/template_cpp/src/include -g -o CMakeFiles/da_proc.dir/src/socket.o -c /home/souly/Desktop/da_project/template_cpp/src/src/socket.cpp",
+  "file": "/home/souly/Desktop/da_project/template_cpp/src/src/socket.cpp"
+},
+{
+  "directory": "/home/souly/Desktop/da_project/template_cpp/src/build",
+  "command": "/bin/x86_64-linux-gnu-g++-9  -I/home/souly/Desktop/da_project/template_cpp/src/include -g -o CMakeFiles/da_proc.dir/src/perfectlink.o -c /home/souly/Desktop/da_project/template_cpp/src/src/perfectlink.cpp",
+  "file": "/home/souly/Desktop/da_project/template_cpp/src/src/perfectlink.cpp"
+}
+]

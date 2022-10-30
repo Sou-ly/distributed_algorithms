@@ -32,26 +32,23 @@ namespace da
         close(this->sockfd);
     }
 
-    ssize_t socket_descriptor::write(const std::string &buf, const udp_sockaddr &dest)
+    ssize_t socket_descriptor::write(const void * buf, size_t len, const udp_sockaddr &dest)
     {
         sockaddr_in addr;
         addr.sin_addr.s_addr = dest.ip;
         addr.sin_port = dest.port;
         addr.sin_family = AF_INET;
-        ssize_t retsize = sendto(sockfd, buf.c_str(), buf.size(), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(sockaddr_in));
+        ssize_t retsize = sendto(sockfd, buf, len, 0, reinterpret_cast<sockaddr *>(&addr), sizeof(sockaddr_in));
         return retsize;
     }
 
-    ssize_t socket_descriptor::read(std::string &buf, size_t max_len, udp_sockaddr &src)
+    ssize_t socket_descriptor::read(void* buf, size_t max_len, udp_sockaddr &src)
     {
-        char *stringbuf = static_cast<char *>(malloc(max_len));
         sockaddr_in addr;
         socklen_t socklen;
-        ssize_t retsize = recvfrom(sockfd, stringbuf, max_len, 0,
+        ssize_t retsize = recvfrom(sockfd, buf, max_len, 0,
                                    reinterpret_cast<sockaddr *>(&addr), &socklen);
         src = {addr.sin_addr.s_addr, addr.sin_port};
-        buf = stringbuf;
-        free(stringbuf);
         return retsize;
     }
 
