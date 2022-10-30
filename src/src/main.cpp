@@ -1,14 +1,12 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
-
-#include "udpsocket.hpp"
-#include "pp2p.hpp"
-#include "parser.hpp"
-#include "hello.h"
 #include <signal.h>
 
-#define MAX_MSG_LEN 1024
+#include "socket.hpp"
+#include "parser.hpp"
+#include "hello.h"
+#include "perfectlink.hpp"
 
 static void stop(int)
 {
@@ -72,29 +70,25 @@ int main(int argc, char **argv)
   std::cout << "Doing some initialization...\n\n";
 
   Parser::Host me = parser.hosts()[parser.id()];
+  da::udp_sockaddr host{me.ip, me.port};
+  da::udp_socket socket = da::socket_descriptor::bind(host);
+  da::perfect_link link(socket);
+  link.upon_deliver([](std::string &msg, da::udp_sockaddr &src) -> void
+                    { std::cout << msg << "\n"; });
 
-  UdpSocket socket(me.ip, me.port);
+  std::cout << "Broadcasting...\n\n";
 
   // After a process finishes broadcasting,
   // it waits forever for the delivery of messages.
-  Message msg{0, parser.id(), parser.id()};
+  std::string message = std::to_string(parser.id());
+  for (auto &peer : parser.hosts())
+  {
+    da::udp_sockaddr host{peer.ip, peer.port};
+    link.send(message, host);
+  }
   while (true)
   {
-    msg.msg_id++;
-    for (auto &peer : parser.hosts())
-    {
-      if (peer.port != me.port)
-      {
-        if (socket.send(static_cast<const Message *>(&msg), peer.ip, peer.port) < 0)
-        {
-          exit(errno);
-        }
-      }
-    }
-    Message rec;
-    socket.receive(&rec);
-    std::cout << std::to_string(rec.msg_id) << "\n";
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 
   return 0;

@@ -1,0 +1,3 @@
+/home/souly/Desktop/da_project/template_cpp/src/cmake-build-debug/CMakeFiles/da_proc.dir
+/home/souly/Desktop/da_project/template_cpp/src/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/souly/Desktop/da_project/template_cpp/src/cmake-build-debug/CMakeFiles/rebuild_cache.dir
