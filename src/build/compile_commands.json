@@ -18,5 +18,10 @@
   "directory": "/home/souly/Desktop/da_project/template_cpp/src/build",
   "command": "/bin/x86_64-linux-gnu-g++-9  -I/home/souly/Desktop/da_project/template_cpp/src/include -g -o CMakeFiles/da_proc.dir/src/perfectlink.o -c /home/souly/Desktop/da_project/template_cpp/src/src/perfectlink.cpp",
   "file": "/home/souly/Desktop/da_project/template_cpp/src/src/perfectlink.cpp"
+},
+{
+  "directory": "/home/souly/Desktop/da_project/template_cpp/src/build",
+  "command": "/bin/x86_64-linux-gnu-g++-9  -I/home/souly/Desktop/da_project/template_cpp/src/include -g -o CMakeFiles/da_proc.dir/src/beb.o -c /home/souly/Desktop/da_project/template_cpp/src/src/beb.cpp",
+  "file": "/home/souly/Desktop/da_project/template_cpp/src/src/beb.cpp"
 }
 ]

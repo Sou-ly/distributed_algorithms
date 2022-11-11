@@ -3,6 +3,9 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=c,c++
 #
 
+hosts
+output/
+configs/
 bin/da_proc
 target/
 

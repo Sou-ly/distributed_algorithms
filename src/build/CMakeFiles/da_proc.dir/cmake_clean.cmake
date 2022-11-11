@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/da_proc.dir/src/beb.o"
+  "CMakeFiles/da_proc.dir/src/beb.o.d"
   "CMakeFiles/da_proc.dir/src/hello.o"
   "CMakeFiles/da_proc.dir/src/hello.o.d"
   "CMakeFiles/da_proc.dir/src/main.o"
