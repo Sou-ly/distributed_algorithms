@@ -37,13 +37,11 @@ namespace da
                             address origin = unpack<address>(m);
                             message_id id = unpack<message_id>(m);
                             acks[origin][id].insert(sender);
-                            {
                             std::lock_guard<std::mutex> lock(pending_mutex);
                             if (pending[origin].find(id) == pending[origin].end())
                             {
                                 pending[origin].insert(id);
                                 beb::broadcast(copy);
-                            }
                             }
                             // at this point, the message is always in pending
                             if (can_deliver(origin, id) && delivered[origin].find(id) == delivered[origin].end())
@@ -55,6 +53,6 @@ namespace da
 
     inline bool uniform_reliable_broadcast::can_deliver(address origin, message_id id)
     {
-        return acks[origin][id].size() > peers.size() / 2;
+        return acks[origin][id].size() > (peers.size() + 1) / 2;
     }
 }

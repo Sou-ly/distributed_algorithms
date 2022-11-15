@@ -93,7 +93,10 @@ int main(int argc, char **argv)
   for (auto const &peer : parser.hosts())
   {
     da::address remote{peer.ip, peer.port};
-    peers.push_back(remote);
+    if (peer.id != parser.id())
+    {
+      peers.push_back(remote);
+    }
     proc_id[remote] = std::to_string(peer.id);
   }
 
@@ -119,15 +122,16 @@ int main(int argc, char **argv)
   // broadcasting
 
   // listening
-  urb.on_receive([](std::string &msg, da::address &src) -> void
-                 { std::cout << da::unpack<unsigned long>(msg)
-                             << "\n"; });
 
   for (unsigned long i = 1; i <= nbr_msg; i++)
   {
-    std::string msg = da::pack<unsigned long>(i);
+    std::string msg = std::to_string(i);
     urb.broadcast(msg);
+    sent.push_back(msg);
   }
+
+  urb.on_receive([](std::string &msg, da::address &src) -> void
+                 { delivered.push_back(std::make_pair(msg, src));});
 
   while (true)
   {
