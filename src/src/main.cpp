@@ -7,11 +7,12 @@
 #include "parser.hpp"
 #include "hello.h"
 #include "perfectlink.hpp"
-#include "beb.hpp"
+#include "util.hpp"
+#include "urb.hpp"
 
 std::string output_path;
-std::map<da::udp_sockaddr, std::string> proc_id;
-std::vector<std::pair<std::string, da::udp_sockaddr>> delivered;
+std::map<da::address, std::string> proc_id;
+std::vector<std::pair<std::string, da::address>> delivered;
 std::vector<std::string> sent;
 
 static void stop(int)
@@ -88,46 +89,44 @@ int main(int argc, char **argv)
   std::cout << "Doing some initialization...\n\n";
 
   // init addr / id pairs
-  std::vector<da::udp_sockaddr> peers = {};
+  std::vector<da::address> peers = {};
   for (auto const &peer : parser.hosts())
   {
-    da::udp_sockaddr remote{peer.ip, peer.port};
+    da::address remote{peer.ip, peer.port};
     peers.push_back(remote);
     proc_id[remote] = std::to_string(peer.id);
   }
 
   // read config file
   std::fstream conf(parser.configPath(), std::ios::in);
-  unsigned long target_id;
   unsigned long nbr_msg;
   conf >> nbr_msg;
-  conf >> target_id;
   conf.close();
 
   std::cout << "nbr: " << nbr_msg << "\n";
-
-  std::cout << "target: " << target_id << "\n";
 
   // save file output path
   output_path = parser.outputPath();
   std::cout << "output path: " << output_path << "\n";
 
   Parser::Host me = parser.hosts()[parser.id() - 1];
-  da::udp_sockaddr host{me.ip, me.port};
+  da::address host{me.ip, me.port};
 
   da::udp_socket socket = da::socket_descriptor::bind(host);
-  da::best_effort_broadcast beb(socket, peers);
-  beb.on_receive([&](std::string &msg, da::udp_sockaddr &src) -> void
-                 { delivered.push_back(std::make_pair(msg, src)); });
+  da::uniform_reliable_broadcast urb(host, socket, peers);
 
   std::cout << "Broadcasting...\n\n";
   // broadcasting
 
+  // listening
+  urb.on_receive([](std::string &msg, da::address &src) -> void
+                 { std::cout << da::unpack<unsigned long>(msg)
+                             << "\n"; });
+
   for (unsigned long i = 1; i <= nbr_msg; i++)
   {
-    std::string msg = std::to_string(i);
-    beb.broadcast(msg);
-    sent.push_back(msg);
+    std::string msg = da::pack<unsigned long>(i);
+    urb.broadcast(msg);
   }
 
   while (true)

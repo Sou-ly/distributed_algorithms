@@ -16,11 +16,11 @@ namespace da
 
     protected:
         address self;
-        message_id next_id;
+        message_id lsn;
         std::mutex pending_mutex;
         std::map<address, std::set<message_id>> pending;
         std::map<address, std::set<message_id>> delivered;
-        std::map<address, std::map<message_id, size_t>> acks;
+        std::map<address, std::map<message_id, std::set<address>>> acks;
 
     private:
         typedef best_effort_broadcast beb;

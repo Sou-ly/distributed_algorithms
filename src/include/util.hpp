@@ -6,6 +6,8 @@
 
 namespace da
 {
+    typedef unsigned long message_id;
+
     template <typename T>
     std::string pack(T &t)
     {

@@ -6,27 +6,12 @@
 #include <sstream>
 #include <string.h>
 #include <unistd.h>
-#include <netdb.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include "address.hpp"
 
 namespace da
 {
-
-    struct udp_sockaddr
-    {
-        in_addr_t ip;
-        in_port_t port;
-
-        bool operator==(const udp_sockaddr &sa) const {
-            return ip == sa.ip && port == sa.port;
-        }
-
-        bool operator<(const udp_sockaddr &sa) const {
-            return ip < sa.ip || port < sa.port;
-        }
-    };
-
     class socket_descriptor;
 
     typedef std::shared_ptr<socket_descriptor> udp_socket;
@@ -37,10 +22,10 @@ namespace da
         /**
          * @brief Construct a new udp Socket object, binds it to the host and connects it to the remote process
          *
-         * @param host the host udp_sockaddr
-         * @param host_port remote process udp_sockaddr
+         * @param host the host address
+         * @param host_port remote process address
          */
-        static udp_socket bind(udp_sockaddr& host);
+        static udp_socket bind(address& host);
 
         /**
          * @brief Destroy the socket_descriptor object, closes the underlying file descriptor
@@ -53,14 +38,14 @@ namespace da
          *
          * @param buf the message to send
          */
-        ssize_t write(const void * buf, size_t len, const udp_sockaddr &dest);
+        ssize_t write(const void * buf, size_t len, const address &dest);
 
         /**
          * @brief Waits for a message to be received on the UDP channel, blocking call.
          *
          * @param buf a buffer for message to be received
          */
-        ssize_t read(void * buf, size_t max_len, udp_sockaddr &src);
+        ssize_t read(void * buf, size_t max_len, address &src);
 
     private:
         socket_descriptor(int sockfd);

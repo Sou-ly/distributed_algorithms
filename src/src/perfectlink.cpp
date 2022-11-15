@@ -27,7 +27,7 @@ namespace da
     void talk(std::atomic<bool> &talking,
               udp_socket socket,
               std::mutex &mutex,
-              std::vector<std::tuple<udp_sockaddr, unsigned long, void *, size_t>> &sent)
+              std::vector<std::tuple<address, unsigned long, void *, size_t>> &sent)
     {
         while (talking)
         {
@@ -40,7 +40,7 @@ namespace da
         }
     }
 
-    void perfect_link::send(const std::string &buf, const udp_sockaddr &dest)
+    void perfect_link::send(const std::string &buf, const address &dest)
     {
         id++;
         // header
@@ -52,7 +52,7 @@ namespace da
         bytes[2] = (id >> 16) & 0xFF;
         bytes[3] = (id >> 8) & 0xFF;
         bytes[4] = (id >> 0) & 0xFF;
-        std::memcpy(&bytes[5], buf.c_str(), buf.size());
+        std::memcpy(&bytes[5], buf.data(), buf.size());
         // grab sent lock and push into the queue
         std::lock_guard<std::mutex> lock(mutex);
         sent.push_back(std::make_tuple(dest, id, bytes, 5 + buf.size()));
@@ -66,13 +66,13 @@ namespace da
     void listen(std::atomic<bool> &listening,
                 udp_socket socket,
                 std::mutex &mutex,
-                std::map<udp_sockaddr, std::vector<unsigned long>> &delivered,
-                std::vector<std::tuple<udp_sockaddr, unsigned long, void *, size_t>> &sent,
-                std::vector<std::function<void(std::string &, udp_sockaddr &)>> &callbacks)
+                std::map<address, std::vector<unsigned long>> &delivered,
+                std::vector<std::tuple<address, unsigned long, void *, size_t>> &sent,
+                std::vector<std::function<void(std::string &, address &)>> &callbacks)
     {
         while (listening)
         {
-            udp_sockaddr src;
+            address src;
             ssize_t size;
             unsigned char *rec = reinterpret_cast<unsigned char *>(malloc(100));
             if ((size = socket->read(rec, 128, src)) > 0)
@@ -84,7 +84,7 @@ namespace da
                     std::lock_guard<std::mutex> lock(mutex);
                     auto it = std::find_if(sent.begin(),
                                            sent.end(),
-                                           [&](std::tuple<udp_sockaddr, unsigned long, void *, size_t> tup) -> bool
+                                           [&](std::tuple<address, unsigned long, void *, size_t> tup) -> bool
                                            {
                                                return std::get<1>(tup) == id;
                                            });
@@ -100,7 +100,8 @@ namespace da
                     socket->write(&rec[0], 5, src);
                     if (std::find(delivered[src].begin(), delivered[src].end(), id) == delivered[src].end())
                     {
-                        std::string msg(reinterpret_cast<char *>(&rec[5]));
+                        std::string msg;
+                        msg.append(reinterpret_cast<char *>(&rec[5]), size - 5);
                         delivered[src].push_back(id);
                         for (const auto &deliver : callbacks)
                         {
@@ -113,7 +114,7 @@ namespace da
         }
     }
 
-    void perfect_link::upon_deliver(std::function<void(std::string &, udp_sockaddr &)> deliver)
+    void perfect_link::upon_deliver(std::function<void(std::string &, address &)> deliver)
     {
         handlers.push_back(deliver);
         if (!listening)

@@ -6,14 +6,15 @@ namespace da
 {
     class best_effort_broadcast
     {
-        public:
-        best_effort_broadcast(udp_socket socket, std::vector<udp_sockaddr>&);
+    public:
+        best_effort_broadcast(udp_socket socket, std::vector<address> &);
         ~best_effort_broadcast();
-        void broadcast(std::string& msg);
-        void on_receive(std::function<void(std::string&, udp_sockaddr&)>);
-        protected:
+        virtual void broadcast(std::string &msg);
+        virtual void on_receive(std::function<void(std::string &, address &)>);
+
+    protected:
         perfect_link pp2p;
-        std::vector<std::function<void(std::string&, udp_sockaddr&)>> handlers;
-        std::vector<udp_sockaddr> peers;
+        std::vector<std::function<void(std::string &, address &)>> handlers;
+        std::vector<address> peers;
     };
 }

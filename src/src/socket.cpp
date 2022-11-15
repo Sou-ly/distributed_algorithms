@@ -5,7 +5,7 @@ namespace da
 
     socket_descriptor::socket_descriptor(int fd) : sockfd(fd) {}
 
-    udp_socket socket_descriptor::bind(udp_sockaddr &host)
+    udp_socket socket_descriptor::bind(address &host)
     {
         // create udp socket
         int fd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -32,7 +32,7 @@ namespace da
         close(this->sockfd);
     }
 
-    ssize_t socket_descriptor::write(const void * buf, size_t len, const udp_sockaddr &dest)
+    ssize_t socket_descriptor::write(const void * buf, size_t len, const address &dest)
     {
         sockaddr_in addr;
         addr.sin_addr.s_addr = dest.ip;
@@ -42,7 +42,7 @@ namespace da
         return retsize;
     }
 
-    ssize_t socket_descriptor::read(void* buf, size_t max_len, udp_sockaddr &src)
+    ssize_t socket_descriptor::read(void* buf, size_t max_len, address &src)
     {
         sockaddr_in addr;
         socklen_t socklen;

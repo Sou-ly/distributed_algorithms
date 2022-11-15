@@ -10,17 +10,17 @@
 
 namespace da
 {
-    void talk(std::atomic<bool>&, 
-              udp_socket, 
-              std::mutex&, 
-              std::vector<std::tuple<udp_sockaddr, unsigned long, void*, size_t>>&);
-              
-    void listen(std::atomic<bool>&,
+    void talk(std::atomic<bool> &,
+              udp_socket,
+              std::mutex &,
+              std::vector<std::tuple<address, unsigned long, void *, size_t>> &);
+
+    void listen(std::atomic<bool> &,
                 udp_socket,
-                std::mutex&,
-                std::map<udp_sockaddr, std::vector<unsigned long>>&,
-                std::vector<std::tuple<udp_sockaddr, unsigned long, void*, size_t>>&,
-                std::vector<std::function<void(std::string &, udp_sockaddr &)>>&);
+                std::mutex &,
+                std::map<address, std::vector<unsigned long>> &,
+                std::vector<std::tuple<address, unsigned long, void *, size_t>> &,
+                std::vector<std::function<void(std::string &, address &)>> &);
 
     class perfect_link
     {
@@ -45,22 +45,22 @@ namespace da
          * @param dest
          * @return ssize_t
          */
-        void send(const std::string &buf, const udp_sockaddr &dest);
+        void send(const std::string &buf, const address &dest);
 
         /**
          * @brief
          *
          * @param deliver
          */
-        void upon_deliver(std::function<void(std::string &, udp_sockaddr &)> deliver);
+        void upon_deliver(std::function<void(std::string &, address &)> deliver);
 
     private:
         std::atomic<bool> listening, talking;
         unsigned long id;
-        std::vector<std::function<void(std::string &, udp_sockaddr &)>> handlers;
-        std::map<udp_sockaddr, std::vector<unsigned long>> delivered;
+        std::vector<std::function<void(std::string &, address &)>> handlers;
+        std::map<address, std::vector<unsigned long>> delivered;
         std::mutex mutex;
-        std::vector<std::tuple<udp_sockaddr, unsigned long, void*, size_t>> sent;
+        std::vector<std::tuple<address, unsigned long, void *, size_t>> sent;
         std::thread sender, listener;
         udp_socket socket;
     };

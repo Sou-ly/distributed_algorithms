@@ -7,7 +7,7 @@ namespace da
     {
         int p = dgram[0] << 8 | dgram[1];
         in_port_t port = static_cast<in_port_t>(p & 0xFFFF);
-        dgram.erase(0, 4);
+        dgram.erase(0, sizeof(in_port_t));
         return port;
     }
 
