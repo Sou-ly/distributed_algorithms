@@ -53,6 +53,6 @@ namespace da
 
     inline bool uniform_reliable_broadcast::can_deliver(address origin, message_id id)
     {
-        return acks[origin][id].size() > (peers.size() + 1) / 2;
+        return acks[origin][id].size() > peers.size() / 2;
     }
 }

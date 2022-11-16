@@ -20,7 +20,8 @@ namespace da
                 std::mutex &,
                 std::map<address, std::vector<unsigned long>> &,
                 std::vector<std::tuple<address, unsigned long, void *, size_t>> &,
-                std::vector<std::function<void(std::string &, address &)>> &);
+                std::vector<std::function<void(std::string &, address &)>> &,
+                std::vector<address> &);
 
     class perfect_link
     {
@@ -30,7 +31,7 @@ namespace da
          *
          * @param socket
          */
-        perfect_link(udp_socket socket);
+        perfect_link(udp_socket socket, std::vector<address> &);
 
         /**
          * @brief Destroy the Perfect Link object
@@ -55,6 +56,7 @@ namespace da
         void upon_deliver(std::function<void(std::string &, address &)> deliver);
 
     private:
+        std::vector<address> peers;
         std::atomic<bool> listening, talking;
         unsigned long id;
         std::vector<std::function<void(std::string &, address &)>> handlers;

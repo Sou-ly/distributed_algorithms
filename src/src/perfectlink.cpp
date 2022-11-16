@@ -2,8 +2,10 @@
 
 namespace da
 {
-    perfect_link::perfect_link(udp_socket socket) : socket(socket)
+    perfect_link::perfect_link(udp_socket socket, std::vector<address> &peers)
     {
+        this->socket = socket;
+        this->peers = peers;
         talking = false;
         listening = false;
         delivered = {};
@@ -68,7 +70,8 @@ namespace da
                 std::mutex &mutex,
                 std::map<address, std::vector<unsigned long>> &delivered,
                 std::vector<std::tuple<address, unsigned long, void *, size_t>> &sent,
-                std::vector<std::function<void(std::string &, address &)>> &callbacks)
+                std::vector<std::function<void(std::string &, address &)>> &callbacks,
+                std::vector<address> &peers)
     {
         while (listening)
         {
@@ -77,6 +80,12 @@ namespace da
             unsigned char *rec = reinterpret_cast<unsigned char *>(malloc(100));
             if ((size = socket->read(rec, 128, src)) > 0)
             {
+                if (std::find(peers.begin(), peers.end(), src) == peers.end())
+                {   // dirty fix:
+                    // need to filter sender for some reason, socket sometimes uses wrong port
+                    // despite being bound correctly
+                    return;
+                }
                 bool ack = static_cast<bool>(rec[0]);
                 unsigned long id = (rec[1] << 24) | (rec[2] << 16) | (rec[3] << 8) | (rec[4]);
                 if (ack)
@@ -120,7 +129,7 @@ namespace da
         if (!listening)
         {
             listening = true;
-            listener = std::thread(listen, std::ref(listening), socket, std::ref(mutex), std::ref(delivered), std::ref(sent), std::ref(handlers));
+            listener = std::thread(listen, std::ref(listening), socket, std::ref(mutex), std::ref(delivered), std::ref(sent), std::ref(handlers), std::ref(peers));
         }
     }
 }
