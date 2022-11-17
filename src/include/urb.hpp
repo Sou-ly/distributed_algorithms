@@ -15,6 +15,7 @@ namespace da
         inline bool can_deliver(address, message_id);
 
     protected:
+        std::vector<std::function<void(std::string &, address &)>> callbacks;
         address self;
         message_id lsn;
         std::mutex pending_mutex;

@@ -31,6 +31,7 @@ namespace da
 
     void uniform_reliable_broadcast::on_receive(std::function<void(std::string &, address &)> urb_deliver)
     {
+        callbacks.push_back(urb_deliver);
         beb::on_receive([&](std::string &m, address &sender) -> void
                         {
                             std::string copy(m);
@@ -47,7 +48,10 @@ namespace da
                             if (can_deliver(origin, id) && delivered[origin].find(id) == delivered[origin].end())
                             {
                                 delivered[origin].insert(id);
-                                urb_deliver(m, origin);
+                                for (auto const &deliver : callbacks)
+                                {
+                                    deliver(m, origin);
+                                }
                             } });
     }
 

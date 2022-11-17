@@ -9,6 +9,7 @@
 #include "perfectlink.hpp"
 #include "util.hpp"
 #include "urb.hpp"
+#include "frb.hpp"
 
 std::string output_path;
 std::map<da::address, std::string> proc_id;
@@ -113,7 +114,7 @@ int main(int argc, char **argv)
   da::address host{me.ip, me.port};
 
   da::udp_socket socket = da::socket_descriptor::bind(host);
-  da::uniform_reliable_broadcast urb(host, socket, peers);
+  da::fifo_reliable_broadcast urb(host, socket, peers);
 
   std::cout << "Broadcasting...\n\n";
   // broadcasting
