@@ -5,7 +5,7 @@ namespace da
     uniform_reliable_broadcast::uniform_reliable_broadcast(address host, udp_socket socket, std::vector<address> &peers)
         : best_effort_broadcast(socket, peers)
     {
-        lsn = 0;
+        sn = 0;
         self = host;
         pending = {};
         delivered = {};
@@ -16,16 +16,17 @@ namespace da
 
     void uniform_reliable_broadcast::broadcast(std::string &msg)
     {
-        lsn++;
+        sn++;
         std::string datagram;
         datagram.reserve(sizeof(address) + sizeof(message_id) + msg.size());
         // construct header
-        datagram += pack<address>(self);   // origin
-        datagram += pack<message_id>(lsn); // msg id
+        datagram += pack<address>(self);  // origin
+        datagram += pack<message_id>(sn); // msg id
         // add payload
         datagram.append(msg);
-        std::lock_guard<std::mutex> lock(pending_mutex);
-        pending[self].insert(lsn);
+        std::lock_guard<std::mutex> lock(mutex[self]);
+        pending[self].insert(sn);
+        acks[self][sn].insert(self);
         beb::broadcast(datagram);
     }
 
@@ -38,10 +39,11 @@ namespace da
                             address origin = unpack<address>(m);
                             message_id id = unpack<message_id>(m);
                             acks[origin][id].insert(sender);
-                            std::lock_guard<std::mutex> lock(pending_mutex);
+                            std::lock_guard<std::mutex> lock(mutex[origin]);
                             if (pending[origin].find(id) == pending[origin].end())
                             {
                                 pending[origin].insert(id);
+                                acks[origin][id].insert(self);
                                 beb::broadcast(copy);
                             }
                             // at this point, the message is always in pending
@@ -52,11 +54,12 @@ namespace da
                                 {
                                     deliver(m, origin);
                                 }
-                            } });
+                            } 
+                        });
     }
 
     inline bool uniform_reliable_broadcast::can_deliver(address origin, message_id id)
     {
-        return acks[origin][id].size() > peers.size() / 2;
+        return acks[origin][id].size() > (peers.size() + 1) / 2;
     }
 }

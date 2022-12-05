@@ -10,6 +10,7 @@ namespace da
         {
             next[peer] = 1;
         }
+        next[host] = 1;
     }
 
     fifo_reliable_broadcast::~fifo_reliable_broadcast() {}

@@ -32,7 +32,7 @@ namespace da
         close(this->sockfd);
     }
 
-    ssize_t socket_descriptor::write(const void * buf, size_t len, const address &dest)
+    ssize_t socket_descriptor::write(const void *buf, size_t len, const address &dest)
     {
         sockaddr_in addr;
         addr.sin_addr.s_addr = dest.ip;
@@ -42,14 +42,21 @@ namespace da
         return retsize;
     }
 
-    ssize_t socket_descriptor::read(void* buf, size_t max_len, address &src)
+    size_t socket_descriptor::read(void *buf, size_t max_len, address &src)
     {
         sockaddr_in addr;
         socklen_t socklen;
         ssize_t retsize = recvfrom(sockfd, buf, max_len, 0,
                                    reinterpret_cast<sockaddr *>(&addr), &socklen);
         src = {addr.sin_addr.s_addr, addr.sin_port};
-        return retsize;
+        if (retsize < 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return retsize;
+        }
     }
 
 }

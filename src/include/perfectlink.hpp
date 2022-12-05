@@ -10,60 +10,49 @@
 
 namespace da
 {
-    void talk(std::atomic<bool> &,
-              udp_socket,
-              std::mutex &,
-              std::vector<std::tuple<address, unsigned long, void *, size_t>> &);
-
-    void listen(std::atomic<bool> &,
-                udp_socket,
-                std::mutex &,
-                std::map<address, std::vector<unsigned long>> &,
-                std::vector<std::tuple<address, unsigned long, void *, size_t>> &,
-                std::vector<std::function<void(std::string &, address &)>> &,
-                std::vector<address> &);
-
     class perfect_link
     {
     public:
         /**
-         * @brief Construct a new Perfect Link object
+         * @brief Construct a new perfect link object
          *
-         * @param socket
+         * @param socket a shared pointer to a socket_descriptor
+         * @param peers a reference to a list of peers involved in the communications
          */
-        perfect_link(udp_socket socket, std::vector<address> &);
+        perfect_link(udp_socket socket, std::vector<address> &peers);
 
         /**
-         * @brief Destroy the Perfect Link object
+         * @brief Destroy the perfect link object, stops listening to receive events on destruction.
          *
          */
         ~perfect_link();
 
         /**
-         * @brief
+         * @brief Send a message over a reliable udp channel to a single remote process.
          *
-         * @param buf
-         * @param dest
-         * @return ssize_t
+         * @param msg a reference to the message to be sent
+         * @param dest the address of destination of the message
          */
-        void send(const std::string &buf, const address &dest);
+        void send(const std::string &msg, const address &dest);
 
         /**
-         * @brief
+         * @brief Add a callback to be called on receive events, starts listening on first call.
          *
-         * @param deliver
+         * @param pp2p_deliver the callback to be called on a receive event
          */
-        void upon_deliver(std::function<void(std::string &, address &)> deliver);
+        void upon_deliver(std::function<void(std::string &, address &)> pp2p_deliver);
 
     private:
-        std::vector<address> peers;
-        std::atomic<bool> listening, talking;
-        unsigned long id;
-        std::vector<std::function<void(std::string &, address &)>> handlers;
-        std::map<address, std::vector<unsigned long>> delivered;
-        std::mutex mutex;
-        std::vector<std::tuple<address, unsigned long, void *, size_t>> sent;
-        std::thread sender, listener;
+        void talk();
+        void listen();
         udp_socket socket;
+        message_id sn;
+        std::thread sender, listener;
+        std::atomic<bool> listening, talking;
+        std::vector<address> peers;
+        std::vector<std::function<void(std::string &, address &)>> handlers;
+        std::unordered_map<address, std::vector<message_id>> delivered;
+        std::unordered_map<address, std::mutex> mutex;
+        std::unordered_map<address, std::map<message_id, std::pair<void *, size_t>>> sent;
     };
 }

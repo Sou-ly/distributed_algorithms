@@ -3,7 +3,10 @@
 namespace da
 {
     best_effort_broadcast::best_effort_broadcast(udp_socket socket, std::vector<address> &peers)
-        : pp2p(socket, peers), peers(peers) {}
+        : pp2p(socket, peers)
+    {
+        this->peers = peers;
+    }
 
     best_effort_broadcast::~best_effort_broadcast() {}
 
@@ -21,7 +24,7 @@ namespace da
         if (handlers.size() == 1)
         {
             pp2p.upon_deliver([&](std::string &msg, address &src) -> void
-                {
+                              {
                     for (auto const &handler : handlers)
                     {
                         handler(msg, src);

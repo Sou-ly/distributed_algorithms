@@ -45,7 +45,7 @@ namespace da
          *
          * @param buf a buffer for message to be received
          */
-        ssize_t read(void * buf, size_t max_len, address &src);
+        size_t read(void * buf, size_t max_len, address &src);
 
     private:
         socket_descriptor(int sockfd);

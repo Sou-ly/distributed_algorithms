@@ -8,6 +8,13 @@ namespace da
 {
     typedef unsigned long message_id;
 
+    /**
+     * @brief Serializes a a given object of type T into a std::string of size sizeof(T)
+     *
+     * @tparam T the type of the object
+     * @param t the object to be serialized
+     * @return std::string the serialized object
+     */
     template <typename T>
     std::string pack(T &t)
     {
@@ -21,6 +28,13 @@ namespace da
         return dgram;
     }
 
+    /**
+     * @brief Deserializes the first sizeof(T) leading bytes of a given datagram into an object of type T
+     * 
+     * @tparam T the type of the object to be created
+     * @param dgram the datagram to partially deserialize
+     * @return T the deserialized object
+     */
     template <typename T>
     T unpack(std::string &dgram)
     {
